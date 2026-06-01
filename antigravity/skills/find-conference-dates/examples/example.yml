@@ -1,0 +1,65 @@
+- title: ASIACCS
+  year: 2026
+  id: asiaccs26
+  full_name: The 22st ACM ASIA Conference on Computer and Communications Security
+  link: "https://asiaccs2027.cityu.edu.mo"
+  deadlines:
+    - type: submission
+      label: (1st round) Paper Submission
+      date: "2026-08-21 23:59:00"
+      timezone: UTC-12
+    - type: author_notification
+      label: (1st round) Early Rejection
+      date: "2026-09-25 07:59:00"
+      timezone: UTC-12
+    - type: rebuttal_start
+      label: (1st round) Rebuttal Period Start
+      date: "2026-10-26 07:59:00"
+      timezone: UTC-12
+    - type: rebuttal_end
+      label: (1st round) Rebuttal Period End
+      date: "2026-10-30 23:59:00"
+      timezone: UTC-12
+    - type: final_decision
+      label: (1st round) Author Notification
+      date: "2026-11-13 07:59:00"
+      timezone: UTC-12
+    - type: submission
+      label: (2nd round) Paper Submission
+      date: "2026-12-11 23:59:00"
+      timezone: UTC-12
+    - type: author_notification
+      label: (2nd round) Early Rejection
+      date: "2027-02-05 07:59:00"
+      timezone: UTC-12
+    - type: submission
+      label: First round major revision deadline
+      date: "2027-02-10 07:59:00"
+      timezone: UTC-12
+    - type: rebuttal_start
+      label: (2nd round) Rebuttal Period Start
+      date: "2027-03-08 07:59:00"
+      timezone: UTC-12
+    - type: rebuttal_end
+      label: (2nd round) Rebuttal Period End
+      date: "2027-03-10 23:59:00"
+      timezone: UTC-12
+    - type: final_decision
+      label: (2nd round) Author Notification
+      date: "2027-03-31 07:59:00"
+      timezone: UTC-12
+  timezone: UTC-12
+  city: Macau
+  country: Macau
+  venue: 永利皇宮, 澳门體育館大馬路
+  format: in-person
+  date: July 12-16, 2027
+  start: 2027-07-12
+  end: 2027-07-16
+  tags:
+      - cryptography
+      - security-and-privacy
+  rankings:
+      rank_name: A
+      rank_source: ICORE2026
+      rank_source_url: https://portal.core.edu.au/conf-ranks/61/

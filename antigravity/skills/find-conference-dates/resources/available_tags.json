@@ -1,0 +1,15 @@
+{
+  "machine-learning": { "id": "machine-learning", "label": "Machine Learning" },
+  "multimedia": { "id": "multimedia", "label": "Multimedia" },
+  "robotics": { "id": "robotics", "label": "Robotics" },
+  "computer-vision": { "id": "computer-vision", "label": "Computer Vision" },
+  "data-mining": { "id": "data-mining", "label": "Data Mining" },
+  "natural-language-processing": { "id": "natural-language-processing", "label": "Natural Language Processing" },
+  "signal-processing": { "id": "signal-processing", "label": "Signal Processing" },
+  "speech-processing": { "id": "speech-processing", "label": "Speech Processing" },
+  "human-computer-interaction": { "id": "human-computer-interaction", "label": "Human Computer Interaction" },
+  "information-theory": { "id": "information-theory", "label": "Information Theory" },
+  "information-retrieval": { "id": "information-retrieval", "label": "Information Retrieval" },
+  "cryptography": { "id": "cryptography", "label": "Cryptography" },
+  "security-and-privacy": { "id": "security-and-privacy", "label": "Security & Privacy" }
+}
