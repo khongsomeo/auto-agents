@@ -99,7 +99,7 @@ Launch **one** browser subagent with a task that covers both URLs. This is your 
 - **`year`**: The year the conference *takes place* (integer, not the submission year).
 - **`link`**: The canonical URL of the conference homepage.
 - **`deadlines`**: A list of all important milestone dates (see deadline schema below).
-- **`timezone`**: The timezone that applies to submission deadlines (e.g., `UTC-12`, `AoE`, `UTC`). If the site says "AoE" or "Anywhere on Earth", use `UTC-12`.
+- **`timezone`**: The timezone that applies to submission deadlines (e.g., `UTC-12`, `AoE`, `UTC`). If the site says "AoE" or "Anywhere on Earth", use `UTC-12`. **If the site does not state a timezone at all, default to `UTC-12` (AoE).**
 - **`city`** and **`country`**: The conference venue location.
 - **`venue`**: The venue name/address (if available; use `TBD` if not announced).
 - **`format`**: `in-person` or `hybrid` — **no other values are permitted**.
@@ -263,6 +263,7 @@ Before writing **each** file, answer every question. A "no" on the first three i
 - [ ] All dates come exclusively from the two provided URLs — none fabricated.
 - [ ] All dates are in `YYYY-MM-DD HH:MM:SS` format and quoted as strings.
 - [ ] Timezone is present on both the top-level field and every individual deadline entry.
+- [ ] If no timezone is stated on the website, `UTC-12` (AoE) is used — never `TBD`.
 
 **Schema correctness:**
 - [ ] `format` is `in-person` or `hybrid` — the word `virtual` does not appear anywhere.
