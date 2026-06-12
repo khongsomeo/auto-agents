@@ -18,6 +18,9 @@ This skill automates adding a new conference to the `ai-deadlines` tracker. Give
 
 ## Inputs
 
+The user can either provide the details directly, or the skill can read them from [explore.json](file:///.agent/skills/find-conference-dates/resources/explore.json) located in the skill's `resources` directory.
+
+### Direct Input
 The user must provide all three of the following:
 
 | Input | Description | Example |
@@ -25,6 +28,18 @@ The user must provide all three of the following:
 | `conference_url` | Official conference website | `https://2027.emnlp.org` |
 | `short_name` | Abbreviated name (used as file/id base) | `EMNLP` |
 | `core_ranking_url` | Direct CORE portal link for this conference | `https://portal.core.edu.au/conf-ranks/1232/` |
+
+### JSON Input (explore.json)
+Alternatively, check `.agent/skills/find-conference-dates/resources/explore.json`. The file lists one or more conferences as key-value pairs:
+```json
+{
+    "SHORT_NAME": {
+        "conference_url": "...",
+        "conference_rank_url": "..."
+    }
+}
+```
+If this file is present and has conferences to import, the skill will read it and sequentially process each entry.
 
 ---
 
@@ -44,8 +59,17 @@ Once the browser session for a conference has ended, you MUST NOT re-open a brow
 **RULE 4 — FORMAT IS `in-person` OR `hybrid` ONLY.**
 The value `virtual` does not exist in this project. Do not use it even if the website says the event is fully online.
 
-**RULE 5 — NO CAMERA-READY OR REGISTRATION DEADLINES.**
-Skip camera-ready, final-version, author registration, and early/late registration dates entirely. They must not appear in the YAML.
+**RULE 5 — ONLY MAIN PAPERS; NO WORKSHOPS, CAMERA-READY OR REGISTRATION.**
+ONLY include deadlines for full papers or short papers (research, applied, or industry). Do NOT include workshops, challenges, tutorials, symposiums, or doctoral consortiums unless explicitly asked to. Skip camera-ready, final-version, author registration, and early/late registration dates entirely. They must not appear in the YAML.
+
+**RULE 6 — DO NOT CREATE NEW TAGS.**
+You MUST NOT create any new tags under any circumstances. You must ONLY assign tags from the exact list provided in `available_tags.json` (listed in Step 4). If a topic does not match any existing tag, simply omit it.
+
+**RULE 7 — DO NOT TRY TO REBUILD THE SITE.**
+Your task is strictly limited to updating YAML data files. You must **NEVER** run commands to build, build-check, or compile the site (e.g. `npm run build`, `npm run dev`, or checks/linters) to test your changes. This is a strict project rule to conserve execution tokens.
+
+**RULE 8 — AUTOMATIC TERMINATION ON EMPTY INPUT.**
+If using `explore.json` as the input source and it is empty, contains no conferences, or does not exist, you must immediately terminate the skill execution without performing any browser calls, file checks, or updates. Only proceed with execution if there is valid content to process.
 
 ---
 
@@ -100,7 +124,7 @@ Launch **one** browser subagent with a task that covers both URLs. This is your 
 - **`link`**: The canonical URL of the conference homepage.
 - **`deadlines`**: A list of all important milestone dates (see deadline schema below).
 - **`timezone`**: The timezone that applies to submission deadlines (e.g., `UTC-12`, `AoE`, `UTC`). If the site says "AoE" or "Anywhere on Earth", use `UTC-12`. **If the site does not state a timezone at all, default to `UTC-12` (AoE).**
-- **`city`** and **`country`**: The conference venue location.
+- **`city`** and **`country`**: The conference venue location. **Important:** Conferences held in the USA must format the city as `<city name>, <state short code>` (e.g., `Tempe, AZ`) and the country MUST be `United States`.
 - **`venue`**: The venue name/address (if available; use `TBD` if not announced).
 - **`format`**: `in-person` or `hybrid` — **no other values are permitted**.
 - **`date`**: Human-readable conference date range (e.g., `"November 5-9, 2027"`).
@@ -135,10 +159,15 @@ Each deadline entry follows this schema:
 | Rebuttal ends / Author response closes | `rebuttal_end` |
 | Major revision deadline | `submission` |
 
+**Deadlines to include — ONLY include these:**
+- Full papers (research, applied, industry)
+- Short papers (research, applied, industry)
+
 **Deadlines to skip entirely — do not include these:**
 
 | Website language | Action |
 |---|---|
+| Workshops, challenges, tutorials, symposiums | **Skip — do not add to YAML** |
 | Camera-ready / Final version / Camera ready deadline | **Skip — do not add to YAML** |
 | Author registration / Early registration / Late registration | **Skip — do not add to YAML** |
 
@@ -150,15 +179,18 @@ Each deadline entry follows this schema:
 - If the website gives an explicit time, use that time exactly.
 - If the conference has multiple rounds, label them clearly (e.g., `"(1st round) Paper Submission"`).
 
----
-
 ### Step 3 — Extract CORE Ranking (from the same browser session)
 
 The CORE ranking page must be visited inside the **same** browser session as Step 1. Extract:
 
-- **`rank_name`**: The ranking letter (e.g., `A*`, `A`, `B`, `C`).
-- **`rank_source`**: The edition label (e.g., `ICORE2026`). Look for the year on the CORE page — it is typically in the page title or the ranking table header.
-- **`rank_source_url`**: Use exactly the URL the user provided as `core_ranking_url`.
+- **`rank_name`**: The ranking letter (e.g., `A*`, `A`, `B`, `C`). If the conference is not ranked, use `Non-ranked`.
+- **`rank_source`** and **`rank_source_url`**:
+  - If the conference has a CORE rank: Use the edition label (e.g., `ICORE2026`) for `rank_source`, and the exact URL the user provided for `rank_source_url`.
+  - If the conference is **Non-ranked**:
+    - The provided `conference_rank_url` becomes `rank_source_url`.
+    - If `rank_source_url` belongs to **Springer**: Set `rank_source` to the Springer book series (for instance, `Springer LNAI` or `Springer CCIS`).
+    - If `rank_source_url` belongs to **IEEE**: Set `rank_source` to the IEEE platform (for instance, `IEEE Xplore`).
+    - For any other cases outside these two publishers, use the user's input directly for `rank_source` and mark the `rank_source_url` as `"#"` (for example, if `rank_source` is `"National"`, `rank_source_url` must be `"#"`).
 
 ---
 
@@ -259,7 +291,7 @@ Before writing **each** file, answer every question. A "no" on the first three i
 - [ ] No additional browser was opened after the session closed to verify or fill in gaps.
 
 **Deadline content:**
-- [ ] No camera-ready, final-version, author-registration, or event-registration deadlines are in the YAML.
+- [ ] Only full/short paper deadlines are included. No workshops, challenges, camera-ready, final-version, or registration deadlines are in the YAML.
 - [ ] All dates come exclusively from the two provided URLs — none fabricated.
 - [ ] All dates are in `YYYY-MM-DD HH:MM:SS` format and quoted as strings.
 - [ ] Timezone is present on both the top-level field and every individual deadline entry.
@@ -295,7 +327,11 @@ Write the final YAML to:
 /home/tlxuong/Documents/ai-deadlines/src/data/conferences/<short_name_lowercase>.yml
 ```
 
-If the file already exists (older edition), **prepend** the new edition entry at the top of the file rather than overwriting it.
+If the file already exists (older edition):
+- **Prepend** the new edition entry at the top of the file rather than overwriting it.
+- Follow the conference's structure in the past to identify details you might have missed.
+- If the conference's rank remains unchanged and it has been tracked in the past, you can copy the past conference's `rankings` section directly.
+- Your task is only updating yml files; do **NOT** try to rebuild the site (e.g. running builds/checks) to save tokens.
 
 After writing, report back to the user with:
 1. The file path created/updated.
