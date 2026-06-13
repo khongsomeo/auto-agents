@@ -1,2 +1,26 @@
 {
+  "DaWaK": {
+    "conference_url": "https://www.dexa.org/2026/dawak2026.html",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/410/"
+  },
+  "MobiSys": {
+    "conference_url": "https://www.sigmobile.org/mobisys/2026/",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/45/"
+  },
+  "EANN": {
+    "conference_url": "https://eannconf.org/2026",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/1011/"
+  },
+  "AIES": {
+    "conference_url": "https://www.aies-conference.com/2026/",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/2354/"
+  },
+  "ICMLA": {
+    "conference_url": "https://www.icmla-conference.org/icmla26/",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/1122/"
+  },
+  "ISNN": {
+    "conference_url": "https://conference.cs.cityu.edu.hk/isnn/",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/1402/"
+  }
 }

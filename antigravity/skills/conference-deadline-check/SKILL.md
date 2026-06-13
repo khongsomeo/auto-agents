@@ -1,13 +1,13 @@
 ---
 name: conference-deadline-check
-description: Checks for updates on conferences that currently have TBD paper submission deadlines. It reads the existing yml files to extract the link, and sequentially scrapes each conference website to find updated dates.
+description: Checks for updates on conferences that currently have TBD paper submission deadlines or TBD conference dates. It reads the existing yml files to extract the link, and sequentially scrapes each conference website to find updated dates.
 ---
 
 # Skill: Conference Deadline Check (TBD Updates)
 
 ## Overview
 
-This skill checks for updates to conferences in the database that currently have a `TBD` paper submission deadline. It automates identifying which conferences need updates, extracting their website links from their current YAML configurations, scraping their official websites for newly announced deadlines, and updating the database.
+This skill checks for updates to conferences in the database that currently have a `TBD` paper submission deadline or `TBD` conference dates. It automates identifying which conferences need updates, extracting their website links from their current YAML configurations, scraping their official websites for newly announced deadlines/dates, and updating the database.
 
 ---
 
@@ -35,9 +35,9 @@ These are hard constraints. They match the guidelines from the `find-conference-
 ## Step-by-Step Workflow
 
 ### Step 1: Identify Conferences with TBD Deadlines
-Run the helper script inside the skill's scripts directory:
+Run the helper script inside the skill's scripts directory using Python, passing the path to the workspace root or the `conferences` data directory as a required argument:
 ```bash
-./.agent/skills/conference-deadline-check/scripts/find_tbd.py
+python3 .agent/skills/conference-deadline-check/scripts/find_tbd.py <path_to_workspace_or_conf_dir>
 ```
 
 ### Step 2: Read Existing Configurations

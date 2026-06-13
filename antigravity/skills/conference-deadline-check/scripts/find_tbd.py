@@ -1,23 +1,31 @@
 #!/usr/bin/env python3
+import argparse
 import os
+import sys
 import yaml
 
 def main():
-    # Resolve path relative to script location
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # .agent/skills/conference-deadline-check/scripts -> 4 levels up to workspace root
-    workspace_root = os.path.abspath(os.path.join(script_dir, '../../../../'))
-    conf_dir = os.path.join(workspace_root, 'src/data/conferences')
+    parser = argparse.ArgumentParser(description="Find conferences with TBD deadlines or dates.")
+    parser.add_argument("path", help="Path to the workspace root or conferences data directory.")
+    args = parser.parse_args()
+
+    target_path = os.path.abspath(args.path)
+
+    if not os.path.exists(target_path):
+        print(f"Error: Specified path '{target_path}' does not exist.")
+        sys.exit(1)
+
+    # Determine conferences directory
+    if target_path.endswith('conferences') and os.path.basename(target_path) == 'conferences':
+        conf_dir = target_path
+    else:
+        conf_dir = os.path.join(target_path, 'src/data/conferences')
+
+    if not os.path.exists(conf_dir):
+        print(f"Error: Conferences directory not found at '{conf_dir}'.")
+        sys.exit(1)
+
     tbd_files = []
-
-    if not os.path.exists(conf_dir):
-        # Fallback to current working directory
-        workspace_root = os.getcwd()
-        conf_dir = os.path.join(workspace_root, 'src/data/conferences')
-
-    if not os.path.exists(conf_dir):
-        print(f"Error: conferences directory not found at {conf_dir}")
-        return
 
     for filename in sorted(os.listdir(conf_dir)):
         if filename.endswith('.yml'):
@@ -28,11 +36,20 @@ def main():
                     if not data or not isinstance(data, list):
                         continue
                     for conf in data:
-                        deadlines = conf.get('deadlines', [])
-                        for d in deadlines:
-                            if d.get('type') == 'submission' and str(d.get('date')).strip().upper() == 'TBD':
-                                tbd_files.append(filename)
-                                break
+                        has_tbd = False
+                        if str(conf.get('date')).strip().upper() == 'TBD' or \
+                           str(conf.get('start')).strip().upper() == 'TBD' or \
+                           str(conf.get('end')).strip().upper() == 'TBD':
+                            has_tbd = True
+                        else:
+                            deadlines = conf.get('deadlines', [])
+                            for d in deadlines:
+                                if d.get('type') == 'submission' and str(d.get('date')).strip().upper() == 'TBD':
+                                    has_tbd = True
+                                    break
+                        if has_tbd:
+                            tbd_files.append(filename)
+                            break
             except Exception:
                 pass
 
