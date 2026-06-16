@@ -47,14 +47,14 @@ If this file is present and has conferences to import, the skill will read it an
 
 These are hard constraints. They apply to **every single conference**, whether you are processing one or twenty. There is no situation, edge case, or "just this once" that overrides them.
 
-**RULE 1 — BROWSER BUDGET: EXACTLY 1 PER CONFERENCE.**
-For each conference, you are allowed exactly **one** `browser_subagent` call. That single session MUST visit both the `conference_url` and the `core_ranking_url` before returning. After it returns, the browser is closed and you write the YAML. You do NOT open another browser to double-check, verify, fill gaps, or look for anything else. If data is missing, write `TBD` and move on.
+**RULE 1 — RESEARCH AGENT BUDGET: EXACTLY 1 PER CONFERENCE.**
+For each conference, you are allowed exactly **one** `research` subagent call (or text-only retrieval tool execution). That single session MUST visit both the `conference_url` and the `core_ranking_url` before returning. After it returns, the research session is closed and you write the YAML. You do NOT perform another lookup to double-check, verify, fill gaps, or look for anything else. If data is missing, write `TBD` and move on.
 
 **RULE 2 — ZERO EXTERNAL URLS.**
 You may ONLY navigate to the exact URLs provided by the user. You MUST NOT visit Google, Bing, Wikipedia, DBLP, Semantic Scholar, any search engine, any conference aggregator, or any URL not explicitly given. If you find yourself tempted to "just quickly check" somewhere else — do not. Write `TBD` and report it.
 
-**RULE 3 — NO VERIFICATION BROWSING AFTER THE FACT.**
-Once the browser session for a conference has ended, you MUST NOT re-open a browser for that conference for any reason. Not to confirm a date. Not to check a venue. Not to validate a ranking. The data you got is the data you use.
+**RULE 3 — NO VERIFICATION RESEARCH AFTER THE FACT.**
+Once the research session for a conference has ended, you MUST NOT perform any additional lookups or open any web resources for that conference for any reason. Not to confirm a date. Not to check a venue. Not to validate a ranking. The data you got is the data you use.
 
 **RULE 4 — FORMAT IS `in-person` OR `hybrid` ONLY.**
 The value `virtual` does not exist in this project. Do not use it even if the website says the event is fully online.
@@ -69,7 +69,7 @@ You MUST NOT create any new tags under any circumstances. You must ONLY assign t
 Your task is strictly limited to updating YAML data files. You must **NEVER** run commands to build, build-check, or compile the site (e.g. `npm run build`, `npm run dev`, or checks/linters) to test your changes. This is a strict project rule to conserve execution tokens.
 
 **RULE 8 — AUTOMATIC TERMINATION ON EMPTY INPUT.**
-If using `explore.json` as the input source and it is empty, contains no conferences, or does not exist, you must immediately terminate the skill execution without performing any browser calls, file checks, or updates. Only proceed with execution if there is valid content to process.
+If using `explore.json` as the input source and it is empty, contains no conferences, or does not exist, you must immediately terminate the skill execution without performing any URL requests, research subagent calls, file checks, or updates. Only proceed with execution if there is valid content to process.
 
 ---
 
@@ -78,7 +78,7 @@ If using `explore.json` as the input source and it is empty, contains no confere
 When the user provides a **list** of conferences, you MUST process them **one at a time, in order, with no parallelism**.
 
 **Strictly sequential means:**
-- Do NOT open browser sessions for multiple conferences at the same time.
+- Do NOT run research sessions for multiple conferences at the same time.
 - Do NOT collect data for conference N+1 before conference N is fully written and reported.
 - Do NOT batch or pipeline any steps across conferences.
 
@@ -88,13 +88,13 @@ When the user provides a **list** of conferences, you MUST process them **one at
 conference_list = [A, B, C, ...]
 
 STEP 1: Process conference A
-  → Open browser (A's conference_url + A's core_ranking_url) → collect data → browser CLOSED.
+  → Open research session (A's conference_url + A's core_ranking_url) → collect data → session CLOSED.
   → Write A's YAML file.
   → Report A's results.
   *** FULLY STOP. A is done. ***
 
 STEP 2: Process conference B  ← only starts after STEP 1 is 100% complete
-  → Open browser (B's conference_url + B's core_ranking_url) → collect data → browser CLOSED.
+  → Open research session (B's conference_url + B's core_ranking_url) → collect data → session CLOSED.
   → Write B's YAML file.
   → Report B's results.
   *** FULLY STOP. B is done. ***
@@ -102,20 +102,20 @@ STEP 2: Process conference B  ← only starts after STEP 1 is 100% complete
 ... repeat for each remaining conference, one at a time.
 ```
 
-**The browser budget is per-conference and non-transferable.** Each conference gets exactly 1 browser call, consumed the moment it returns. You cannot open a browser for a later conference while a previous one is still being processed, and you cannot re-open a browser for a conference that has already been processed.
+**The research budget is per-conference and non-transferable.** Each conference gets exactly 1 research session/agent call, consumed the moment it returns. You cannot run research for a later conference while a previous one is still being processed, and you cannot perform another lookup for a conference that has already been processed.
 
 ---
 
 ## Step-by-Step Instructions
 
-### Step 1 — Single Browser Session: Conference Site + CORE Ranking
+### Step 1 — Single Research Session: Conference Site + CORE Ranking
 
-Launch **one** browser subagent with a task that covers both URLs. This is your **entire browser budget for this conference** — once it returns, no more browsing.
+Launch **one** research subagent with a task that covers both URLs. This is your **entire research budget for this conference** — once it returns, no more URL or retrieval requests.
 
-1. Navigate to `conference_url`. Look for pages named "Important Dates", "Call for Papers", "Submission", or similar. Collect all data listed below.
-2. **In the same browser session**, navigate to `core_ranking_url` and collect the ranking data.
+1. Retrieve `conference_url` content. Look for pages named "Important Dates", "Call for Papers", "Submission", or similar. Collect all data listed below.
+2. **In the same research session**, retrieve `core_ranking_url` content and collect the ranking data.
 3. Return **all** collected data in a single structured report. Do not stop early.
-4. **Do not navigate to any other URL.** If a link on the conference site looks useful but was not explicitly given by the user, ignore it.
+4. **Do not navigate to or read any other URL.** If a link on the conference site looks useful but was not explicitly given by the user, ignore it.
 
 **Conference site — required fields to extract:**
 
@@ -181,7 +181,7 @@ Each deadline entry follows this schema:
 
 ### Step 3 — Extract CORE Ranking (from the same browser session)
 
-The CORE ranking page must be visited inside the **same** browser session as Step 1. Extract:
+The CORE ranking page must be visited inside the **same** research session as Step 1. Extract:
 
 - **`rank_name`**: The ranking letter (e.g., `A*`, `A`, `B`, `C`). If the conference is not ranked, use `Non-ranked`.
 - **`rank_source`** and **`rank_source_url`**:
@@ -285,10 +285,10 @@ Available tags (from `resources/available_tags.json`):
 
 Before writing **each** file, answer every question. A "no" on the first three is a hard failure — stop and fix it before proceeding.
 
-**Browser / source discipline (hard failures if violated):**
-- [ ] Exactly **one** browser session was used for this conference (conference site + CORE ranking, nothing else).
+**Research / source discipline (hard failures if violated):**
+- [ ] Exactly **one** research agent/subagent session (or text-only retrieval tool execution) was used for this conference (conference site + CORE ranking, nothing else).
 - [ ] Zero external URLs were visited — no Google, no Wikipedia, no aggregators, no unlisted URLs.
-- [ ] No additional browser was opened after the session closed to verify or fill in gaps.
+- [ ] No additional URL retrieval or lookup was performed after the session closed to verify or fill in gaps.
 
 **Deadline content:**
 - [ ] Only full/short paper deadlines are included. No workshops, challenges, camera-ready, final-version, or registration deadlines are in the YAML.

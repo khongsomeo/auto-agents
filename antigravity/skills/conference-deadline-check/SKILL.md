@@ -15,12 +15,12 @@ This skill checks for updates to conferences in the database that currently have
 
 These are hard constraints. They match the guidelines from the `find-conference-dates` skill:
 
-1. **RULE 1 — BROWSER BUDGET: EXACTLY 1 PER CONFERENCE.**
-   For each conference checked, you are allowed exactly **one** browser session. That session must visit the homepage and relevant subpages (Important Dates, CFP, etc.) to collect dates and close. Do not open multiple browser sessions.
+1. **RULE 1 — RESEARCH AGENT BUDGET: EXACTLY 1 PER CONFERENCE.**
+   For each conference checked, you are allowed exactly **one** research session/agent call (or text-only retrieval tool execution). That session must retrieve the homepage and relevant subpages (Important Dates, CFP, etc.) to collect dates and finish. Do not run multiple search/retrieval sessions.
 2. **RULE 2 — ZERO EXTERNAL URLS.**
-   Only navigate to the official conference link found inside its YAML configuration. Do NOT visit Google, search engines, or third-party conference calendars/aggregators.
-3. **RULE 3 — NO VERIFICATION BROWSING.**
-   Once the browser session for a conference has ended, do not open another browser session for that conference to double-check.
+   Only navigate to/retrieve the official conference link found inside its YAML configuration. Do NOT visit Google, search engines, or third-party conference calendars/aggregators.
+3. **RULE 3 — NO VERIFICATION RESEARCH.**
+   Once the research session for a conference has ended, do not initiate another lookup or URL query for that conference to double-check.
 4. **RULE 4 — ONLY MAIN PAPERS; NO WORKSHOPS, CAMERA-READY OR REGISTRATION.**
    Only track main track paper deadlines (abstract, paper submission, rebuttal, notification). Skip camera-ready, final version, and registration deadlines entirely.
 5. **RULE 5 — DO NOT TRY TO REBUILD THE SITE.**
@@ -29,6 +29,8 @@ These are hard constraints. They match the guidelines from the `find-conference-
    Do not add custom tags; only use tags defined in `available_tags.json`.
 7. **RULE 7 — STRICT SEQUENTIAL EXECUTION.**
    If multiple conferences are identified as TBD, process them **one at a time, in order, with no parallelism**. You must fully check and process **all** of the returned conferences in a single continuous run, without interrupting the flow to ask the user for confirmation or check-ins. Only present the summary report once all items are fully processed.
+8. **RULE 8 — FRESH REAL-TIME SEARCH ON EVERY INVOCATION.**
+   On every fresh instantiation or request to check/update dates, you MUST perform a fresh real-time search/fetch of the conference website URLs. Do NOT rely on cached context, previous conversation turns, or assumptions from past turns/in-memory states within the conversation to skip fetches. Always execute fresh URL lookups.
 
 ---
 
@@ -45,8 +47,8 @@ For each file returned by the script:
 1. Open and inspect the YAML file in `src/data/conferences/<short_name>.yml`.
 2. Extract the canonical `link` (official conference homepage) and current metadata.
 
-### Step 3: Browse and Scrape for Updates (1 Browser Session)
-1. Start a single browser session to navigate to the official conference URL.
+### Step 3: Scrape for Updates via Research Session (1 Research Session)
+1. Initiate a single research subagent/retrieval session to fetch content from the official conference URL.
 2. Look for updated dates (Abstract deadline, Submission deadline, Rebuttal phase, Notification date).
 3. If new dates are found, record them. If they are still TBD or unannounced, record them as `TBD`.
 

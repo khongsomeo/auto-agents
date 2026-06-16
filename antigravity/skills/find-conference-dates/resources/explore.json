@@ -1,26 +1,26 @@
 {
-  "DaWaK": {
-    "conference_url": "https://www.dexa.org/2026/dawak2026.html",
-    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/410/"
+  "IWCMC": {
+    "conference_url": "https://iwcmc.net/2026/index.php",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/34/"
   },
-  "MobiSys": {
-    "conference_url": "https://www.sigmobile.org/mobisys/2026/",
-    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/45/"
+  "NCA": {
+    "conference_url": "https://www.nca-ieee.org/2026/",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/702/"
   },
-  "EANN": {
-    "conference_url": "https://eannconf.org/2026",
-    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/1011/"
+  "MOBIHOC": {
+    "conference_url": "https://www.sigmobile.org/mobihoc/2026/",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/58/"
   },
-  "AIES": {
-    "conference_url": "https://www.aies-conference.com/2026/",
-    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/2354/"
+  "VL-HCC": {
+    "conference_url": "https://conf.researchr.org/home/vlhcc-2026",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/752/"
   },
-  "ICMLA": {
-    "conference_url": "https://www.icmla-conference.org/icmla26/",
-    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/1122/"
+  "SmartComp": {
+    "conference_url": "https://portale2.unime.it/smartcomp2026/",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/2339/"
   },
-  "ISNN": {
-    "conference_url": "https://conference.cs.cityu.edu.hk/isnn/",
-    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/1402/"
-  }
+  "WiMob": {
+    "conference_url": "http://www.wimob.org/wimob2026/index.php",
+    "conference_rank_url": "https://portal.core.edu.au/conf-ranks/679/"
+  },
 }
