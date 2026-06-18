@@ -31,6 +31,8 @@ These are hard constraints. They match the guidelines from the `find-conference-
    If multiple conferences are identified as TBD, process them **one at a time, in order, with no parallelism**. You must fully check and process **all** of the returned conferences in a single continuous run, without interrupting the flow to ask the user for confirmation or check-ins. Only present the summary report once all items are fully processed.
 8. **RULE 8 — FRESH REAL-TIME SEARCH ON EVERY INVOCATION.**
    On every fresh instantiation or request to check/update dates, you MUST perform a fresh real-time search/fetch of the conference website URLs. Do NOT rely on cached context, previous conversation turns, or assumptions from past turns/in-memory states within the conversation to skip fetches. Always execute fresh URL lookups.
+9. **RULE 9 — NO GIT OPERATIONS WHATSOEVER.**
+   You are **strictly forbidden** from running any `git` command (`git add`, `git commit`, `git push`, or any variant) and from using the GitHub MCP tool for any purpose (committing, pushing, creating PRs, or anything else). Unless the user explicitly asks you to do something Git-related, you must not perform, suggest, recommend, or mention any Git or GitHub action. Your task ends when the YAML file is updated on disk. Committing or pushing changes is the sole responsibility of the user and must never be automated by this skill.
 
 ---
 

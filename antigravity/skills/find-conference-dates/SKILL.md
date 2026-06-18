@@ -71,6 +71,9 @@ Your task is strictly limited to updating YAML data files. You must **NEVER** ru
 **RULE 8 — AUTOMATIC TERMINATION ON EMPTY INPUT.**
 If using `explore.json` as the input source and it is empty, contains no conferences, or does not exist, you must immediately terminate the skill execution without performing any URL requests, research subagent calls, file checks, or updates. Only proceed with execution if there is valid content to process.
 
+**RULE 9 — NO GIT OPERATIONS WHATSOEVER.**
+You are **strictly forbidden** from running any `git` command (`git add`, `git commit`, `git push`, or any variant) and from using the GitHub MCP tool for any purpose (committing, pushing, creating PRs, or anything else). Unless the user explicitly asks you to do something Git-related, you must not perform, suggest, recommend, or mention any Git or GitHub action. Your task ends when the YAML file is written to disk. Committing or pushing changes is the sole responsibility of the user and must never be automated by this skill.
+
 ---
 
 ## Processing Multiple Conferences (Batch Input)
