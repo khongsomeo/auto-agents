@@ -36,19 +36,22 @@ def main():
                     if not data or not isinstance(data, list):
                         continue
                     for conf in data:
-                        has_tbd = False
+                        if conf.get('year', 0) < 2026:
+                            continue
+                        missing = []
                         if str(conf.get('date')).strip().upper() == 'TBD' or \
                            str(conf.get('start')).strip().upper() == 'TBD' or \
                            str(conf.get('end')).strip().upper() == 'TBD':
-                            has_tbd = True
-                        else:
-                            deadlines = conf.get('deadlines', [])
-                            for d in deadlines:
-                                if d.get('type') == 'submission' and str(d.get('date')).strip().upper() == 'TBD':
-                                    has_tbd = True
-                                    break
-                        if has_tbd:
-                            tbd_files.append(filename)
+                            missing.append('date')
+                        if str(conf.get('venue')).strip().upper() == 'TBD':
+                            missing.append('venue')
+                        deadlines = conf.get('deadlines', [])
+                        for d in deadlines:
+                            if d.get('type') == 'submission' and str(d.get('date')).strip().upper() == 'TBD':
+                                missing.append('submission')
+                                break
+                        if missing:
+                            tbd_files.append(f"{filename} | {conf.get('year')} | {','.join(missing)} | {conf.get('link')}")
                             break
             except Exception:
                 pass

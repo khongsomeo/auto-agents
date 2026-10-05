@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 import yaml
-from datetime import datetime
+from datetime import datetime, date, time
 
 def main():
     parser = argparse.ArgumentParser(description="Find conferences where all deadlines have passed.")
@@ -63,7 +63,28 @@ def main():
                             has_future_or_tbd = True
                             break
                     
-                    # If all deadlines are valid dates in the past, and we found at least one deadline
+                    # Check conference event dates: the conference itself must have completely concluded
+                    conf_end = latest_conf.get('end') or latest_conf.get('start')
+                    if not conf_end or str(conf_end).strip().upper() == 'TBD':
+                        has_future_or_tbd = True
+                    else:
+                        try:
+                            if isinstance(conf_end, datetime):
+                                conf_end_dt = conf_end
+                            elif isinstance(conf_end, date):
+                                conf_end_dt = datetime.combine(conf_end, time.max)
+                            else:
+                                s = str(conf_end).strip()
+                                if len(s) == 10:
+                                    conf_end_dt = datetime.strptime(s + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+                                else:
+                                    conf_end_dt = datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+                            if conf_end_dt > now:
+                                has_future_or_tbd = True
+                        except Exception:
+                            has_future_or_tbd = True
+
+                    # If all deadlines and conference dates are valid dates in the past
                     if not has_future_or_tbd and has_valid_deadline:
                         passed_files.append(filename)
             except Exception:
