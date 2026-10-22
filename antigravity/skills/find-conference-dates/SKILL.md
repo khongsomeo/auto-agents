@@ -58,8 +58,9 @@ These are hard constraints. They apply to **every single conference**, whether y
 **RULE 1 — RESEARCH AGENT BUDGET: EXACTLY 1 PER CONFERENCE.**
 For each conference, you are allowed exactly **one** `research` subagent call (or text-only retrieval tool execution). That single session MUST visit both the `conference_url` and the `core_ranking_url` before returning. After it returns, the research session is closed and you write the YAML. You do NOT perform another lookup to double-check, verify, fill gaps, or look for anything else. If data is missing, write `TBD` and move on.
 
-**RULE 2 — ZERO EXTERNAL URLS.**
-You may ONLY navigate to the exact URLs provided by the user. You MUST NOT visit Google, Bing, Wikipedia, DBLP, Semantic Scholar, any search engine, any conference aggregator, or any URL not explicitly given. If you find yourself tempted to "just quickly check" somewhere else — do not. Write `TBD` and report it.
+**RULE 2 — ZERO EXTERNAL AGGREGATORS & OFFICIAL DOMAIN FALLBACK.**
+You may ONLY navigate to the official canonical conference URL and the CORE portal link provided. You MUST NOT visit third-party conference aggregator calendars (WikiCFP, DBLP, generic aggregators).
+When direct network retrieval of the official conference URL or the CORE portal is blocked or hindered by sandbox environment proxy errors (such as TLS tunnel rejections `x509: certificate signed by unknown authority`, HTTP 502 Bad Gateway, or HTTP 429 rate limits), you MUST execute the **Official Domain Fallback** using `search_web` strictly constrained to the official domain (`domain: "<canonical_domain>"`, query: `site:<canonical_domain> "Important Dates" OR "Call for Papers"` or `domain: "portal.core.edu.au"`). This queries Google's index of the official site, completely bypassing local proxy issues.
 
 **RULE 3 — NO VERIFICATION RESEARCH AFTER THE FACT.**
 Once the research session for a conference has ended, you MUST NOT perform any additional lookups or open any web resources for that conference for any reason. Not to confirm a date. Not to check a venue. Not to validate a ranking. The data you got is the data you use.
@@ -125,14 +126,26 @@ STEP 2: Process conference B  ← only starts after STEP 1 is 100% complete
 
 ## Step-by-Step Instructions
 
-### Step 1 — Single Research Session: Conference Site + CORE Ranking
+### Step 1 — Single Research Session: Conference Site + CORE Ranking (Mandatory Multi-Tier Procedure)
 
 Launch **one** research subagent with a task that covers both URLs. This is your **entire research budget for this conference** — once it returns, no more URL or retrieval requests.
 
-1. Retrieve `conference_url` content. Look for pages named "Important Dates", "Call for Papers", "Submission", or similar. Collect all data listed below.
-2. **In the same research session**, retrieve `core_ranking_url` content and collect the ranking data.
-3. Return **all** collected data in a single structured report. Do not stop early.
-4. **Do not navigate to or read any other URL.** If a link on the conference site looks useful but was not explicitly given by the user, ignore it.
+#### **Retrieval Pipeline for Conference Site & CORE Ranking:**
+- **Tier 1 (Direct Fetch with Resilient Parameters)**:
+  - Fetch using standard browser `User-Agent` headers.
+  - Include `--insecure` (`-k`) to prevent sandbox proxy MITM / tunnel failures from breaking self-signed or intermediate certificates.
+  - Set a 10s timeout (`--max-time 10`).
+  - Look for pages named "Important Dates", "Call for Papers", "Submission", or similar.
+- **Tier 2 (Subdomain & Common Path Fallback)**:
+  - If Tier 1 yields HTTP 404, connection refused, or redirection loops, toggle the `www.` subdomain (e.g. `https://domain.org` $\leftrightarrow$ `https://www.domain.org`).
+  - If the homepage is sparse, check canonical subpaths (e.g. `/ImportantDates.aspx`, `/dates.html`, `/calls/cfp/`, `/call-for-papers/`).
+- **Tier 3 (Official Domain Search Fallback)**:
+  - If Tier 1 & 2 fail with proxy tunnel errors (`502 Bad Gateway`, `tls: failed to verify certificate: x509`, or `429 Too Many Requests`), **never write TBD or declare the site inaccessible prematurely**.
+  - Execute `search_web` strictly constrained to the official conference domain (`domain: "<canonical_domain>"`, query: `site:<canonical_domain> "Important Dates" OR "Call for Papers"`).
+  - For CORE Ranking: if direct fetch of `portal.core.edu.au` fails, use `search_web` with `domain: "portal.core.edu.au"`.
+- **Tier 4 (Data Extraction & Boundary Validation)**:
+  - Return **all** collected data in a single structured report. Do not stop early.
+  - **Do not navigate to or read any third-party aggregator calendars.**
 
 **Conference site — required fields to extract:**
 
