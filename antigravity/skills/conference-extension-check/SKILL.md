@@ -44,8 +44,12 @@ This skill systematically identifies conferences in `src/data/conferences/` that
    You must investigate ONLY the conference's official canon. You MUST NOT use third-party aggregator calendars (WikiCFP, DBLP, generic aggregators).
    However, when direct network retrieval of the official URL is blocked or hindered by sandbox environment proxy errors (such as TLS tunnel rejections `x509: certificate signed by unknown authority`, HTTP 502 Bad Gateway, or HTTP 429 rate limits), you MUST execute the **Official Domain Fallback** using `search_web` strictly constrained to the official canonical domain (`domain: "<canonical_domain>"`, query: `site:<canonical_domain> "Paper Submission" OR "Deadline" OR "Extended"`). This queries Google's index of the official conference site itself, completely bypassing local proxy issues.
 
-5. **RULE 5 — STRICT SEQUENTIAL EXECUTION.**
-   Process conferences one at a time, in order, with no parallelism. Complete data retrieval and file updates for conference N before initiating conference N+1.
+5. **RULE 5 — EXECUTION MODES: STRICT SEQUENTIAL (DEFAULT) VS. PARALLEL (PROMPT-TRIGGERED).**
+   - **Default Mode (Strictly Sequential)**: If parallel execution is not explicitly requested, process conferences **one at a time, in order, with no parallelism**. Complete data retrieval and file updates for conference N before initiating conference N+1.
+   - **Parallel Mode (Prompt-Triggered)**: Activated **ONLY** when the user's prompt explicitly requests concurrency (e.g., using phrases such as `"running in parallel"`, `"in parallel"`, or `"parallel mode"`).
+     - **Concurrent Fan-Out**: Launch one read-only research subagent per conference concurrently in parallel to execute the multi-tier retrieval pipeline.
+     - **Anti-Race Condition & Single-Writer Constraint**: Subagents are strictly read-only and must never modify files. Only the primary coordinator agent edits YAML files, serializing disk writes to `src/data/conferences/<filename>` as extension reports are received.
+     - **Independent File Partitioning**: Each conference modifies exclusively its own distinct YAML file. No shared file is ever touched concurrently.
 
 6. **RULE 6 — FRESH REAL-TIME RETRIEVAL ON EVERY INVOCATION.**
    On every invocation, you MUST perform a fresh real-time retrieval of the conference website content. Never rely on cached conversation context or assumptions from earlier turns.
@@ -147,7 +151,7 @@ If an extension is confirmed:
    - Preserve timezone formatting (`UTC-12`, `AoE`, or local timezone as designated by the conference).
 
 ### Step 5: Report Results
-After completing all sequential checks, output a clean, structured report to the user:
+After completing all checks (sequential or parallel), output a clean, structured report to the user:
 1. **Newly Extended Conferences**: Conferences where a new extension was discovered and added to the YAML, detailing the original vs. extended deadline dates.
 2. **Already Extended / Up-to-Date Conferences**: Conferences that already had their current extended deadline tracked.
 3. **Firm / Unextended Conferences**: Conferences checked where the deadline remains firm with no extension announced.

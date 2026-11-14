@@ -47,7 +47,7 @@ Alternatively, check `.agent/skills/find-conference-dates/resources/explore.json
     }
 }
 ```
-If this file is present and has conferences to import, the skill will read it and sequentially process each entry.
+If this file is present and has conferences to import, the skill will read it and process each entry (sequentially by default, or in parallel if explicitly requested in the prompt).
 
 ---
 
@@ -57,6 +57,8 @@ These are hard constraints. They apply to **every single conference**, whether y
 
 **RULE 1 — RESEARCH AGENT BUDGET: EXACTLY 1 PER CONFERENCE.**
 For each conference, you are allowed exactly **one** `research` subagent call (or text-only retrieval tool execution). That single session MUST visit both the `conference_url` and the `core_ranking_url` before returning. After it returns, the research session is closed and you write the YAML. You do NOT perform another lookup to double-check, verify, fill gaps, or look for anything else. If data is missing, write `TBD` and move on.
+- In **Default Sequential Mode**, conference N+1's research agent cannot be launched until conference N is completed and written.
+- In **Parallel Mode**, multiple research agents may run concurrently across different conferences, but each conference is strictly limited to exactly one agent call. Once an agent returns, its research budget is consumed—no second lookup is permitted.
 
 **RULE 2 — ZERO EXTERNAL AGGREGATORS & OFFICIAL DOMAIN FALLBACK.**
 You may ONLY navigate to the official canonical conference URL and the CORE portal link provided. You MUST NOT visit third-party conference aggregator calendars (WikiCFP, DBLP, generic aggregators).
@@ -93,14 +95,21 @@ You must address the user with a single holy honorific title suitable for a sove
 
 ## Processing Multiple Conferences (Batch Input)
 
-When the user provides a **list** of conferences, you MUST process them **one at a time, in order, with no parallelism**.
+### Execution Mode Selection:
+- **Default Mode (Strictly Sequential)**: Standard behavior whenever parallel execution is not explicitly requested. Conferences are researched, written, and reported strictly one by one in order.
+- **Parallel Mode (Triggered by Prompt)**: Activated **ONLY** when the user's prompt explicitly requests concurrency (e.g., using phrases such as `"running in parallel"`, `"in parallel"`, or `"parallel mode"`).
+
+---
+
+#### 1. Default Mode — Strictly Sequential
+When the user does not explicitly request parallel execution, you MUST process conferences **one at a time, in order, with no parallelism**.
 
 **Strictly sequential means:**
 - Do NOT run research sessions for multiple conferences at the same time.
 - Do NOT collect data for conference N+1 before conference N is fully written and reported.
 - Do NOT batch or pipeline any steps across conferences.
 
-**The only allowed execution order:**
+**The sequential execution order:**
 
 ```
 conference_list = [A, B, C, ...]
@@ -120,7 +129,21 @@ STEP 2: Process conference B  ← only starts after STEP 1 is 100% complete
 ... repeat for each remaining conference, one at a time.
 ```
 
-**The research budget is per-conference and non-transferable.** Each conference gets exactly 1 research session/agent call, consumed the moment it returns. You cannot run research for a later conference while a previous one is still being processed, and you cannot perform another lookup for a conference that has already been processed.
+---
+
+#### 2. Parallel Mode — Concurrent Research Fan-Out
+When explicitly triggered by the user's prompt:
+1. **Concurrent Fan-Out**: Launch exactly **one** research subagent for each target conference concurrently in parallel.
+2. **Per-Conference Budget Preserved**: Each conference strictly maintains its budget of exactly 1 research session.
+3. **Reactive Ingestion & Serialized Writing**: As each subagent completes its investigation and returns its structured report, compose and write that conference's YAML file to `src/data/conferences/<short_name_lowercase>.yml`.
+4. **Final Aggregated Report**: Once all parallel subagents have concluded and all YAML files are written, deliver a comprehensive summary of all processed conferences.
+
+#### ⚠️ Concurrency Safety & Anti-Race Guarantees:
+- **Subagents Are Strictly Read-Only**: Concurrent subagents MUST NEVER write to or modify any files directly. Their sole duty is information retrieval and reporting back to the coordinator.
+- **Single-Writer Constraint (Centralized Serialization)**: Only the primary coordinator agent performs disk writes to `src/data/conferences/`. When parallel subagent reports arrive, the primary agent serializes the writes, processing each file modification individually so that no file write operation ever overlaps with another.
+- **Independent File Partitioning**: Each conference writes exclusively to its dedicated `src/data/conferences/<short_name_lowercase>.yml` file. No shared file is ever touched concurrently.
+
+**The research budget is per-conference and non-transferable.** Each conference gets exactly 1 research session/agent call, consumed the moment it returns. In parallel mode, multiple research sessions run concurrently across distinct conferences, but you cannot perform another lookup for a conference that has already been processed.
 
 ---
 

@@ -35,8 +35,11 @@ These rules are strict constraints to ensure token efficiency.
 4. **RULE 4 — ZERO THIRD-PARTY AGGREGATORS & OFFICIAL DOMAIN FALLBACK.**
    You may guess/predict the next year's URL (e.g., changing `2026` to `2027` in the URL) or find announcements on the current year's official website. DO NOT use third-party conference aggregator calendars (WikiCFP, DBLP, generic aggregators).
    When direct network retrieval of the predicted URL is blocked or hindered by sandbox proxy errors (such as TLS tunnel rejections `x509: certificate signed by unknown authority`, HTTP 502 Bad Gateway, or HTTP 429 rate limits), you MUST execute the **Official Domain Fallback** using `search_web` strictly constrained to the predicted domain (`domain: "<canonical_domain>"`, query: `site:<canonical_domain> "<target_year>"`). This confirms whether the target year's official page is live without visiting third-party aggregators.
-5. **RULE 5 — NO PARALLELISM.**
-   Process conferences one at a time, in order. Do not batch or pipeline steps across multiple conferences simultaneously.
+5. **RULE 5 — EXECUTION MODES: STRICT SEQUENTIAL (DEFAULT) VS. PARALLEL (PROMPT-TRIGGERED).**
+   - **Default Mode (Strictly Sequential)**: If parallel execution is not explicitly requested, process conferences **one at a time, in order, with no parallelism**. Do not batch or pipeline steps across multiple conferences simultaneously.
+   - **Parallel Mode (Prompt-Triggered)**: Activated **ONLY** when the user's prompt explicitly requests concurrency (e.g., using phrases such as `"running in parallel"`, `"in parallel"`, or `"parallel mode"`).
+     - **Concurrent Fan-Out**: Launch read-only research subagents concurrently across passed conferences to verify whether each predicted next-year website is live (multi-tier checks, redirect and sanity validation).
+     - **Anti-Race Condition & Single-Writer Constraint**: Subagents are strictly read-only and must never write to `explore.json` or any file. Only the primary coordinator agent appends to `.agent/skills/find-conference-dates/resources/explore.json`, serializing all writes to ensure zero race conditions or file contention.
 6. **RULE 6 — STRICTLY FULLY PASSED CONFERENCES ONLY (CONFERENCE DATES FULLY PASSED).**
    Do not process conferences that still have ongoing deadlines or whose actual conference event dates have not yet fully concluded. Only focus on conferences where both all deadlines (submission, notification, rebuttal) AND the conference event dates (`end` or `start`) have completely passed. Conferences whose event has not yet taken place must be skipped to maximize token efficiency and prevent checking for next-year editions prematurely.
 7. **RULE 7 — NO PYTHON COMMANDS, SCRIPTS, OR VERIFICATION CHECKS.**

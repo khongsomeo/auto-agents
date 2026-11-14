@@ -1,6 +1,6 @@
 ---
 name: conference-deadline-check
-description: Checks for updates on conferences that currently have TBD paper submission deadlines or TBD conference dates. It reads the existing yml files to extract the link, and sequentially scrapes each conference website to find updated dates.
+description: Checks for updates on conferences that currently have TBD paper submission deadlines or TBD conference dates. It reads the existing yml files to extract the link, and scrapes each conference website to find updated dates (sequentially by default, or in parallel if explicitly requested).
 ---
 
 # Skill: Conference Deadline Check (TBD Updates)
@@ -36,8 +36,12 @@ These are hard constraints. They match the guidelines from the `find-conference-
    Do **NEVER** run commands like `npm run build` or `npm run dev` to test or check your changes. Strictly limit actions to updating YAML files.
 6. **RULE 6 — DO NOT CREATE NEW TAGS.**
    Do not add custom tags; only use tags defined in `available_tags.json`.
-7. **RULE 7 — STRICT SEQUENTIAL EXECUTION.**
-   If multiple conferences are identified as TBD, process them **one at a time, in order, with no parallelism**. You must fully check and process **all** of the returned conferences in a single continuous run, without interrupting the flow to ask the user for confirmation or check-ins. Only present the summary report once all items are fully processed.
+7. **RULE 7 — EXECUTION MODES: STRICT SEQUENTIAL (DEFAULT) VS. PARALLEL (PROMPT-TRIGGERED).**
+   - **Default Mode (Strictly Sequential)**: If parallel execution is not explicitly requested, process conferences **one at a time, in order, with no parallelism**. You must fully check and process **all** of the returned conferences in a single continuous run, without interrupting the flow to ask the user for confirmation or check-ins. Only present the summary report once all items are fully processed.
+   - **Parallel Mode (Prompt-Triggered)**: Activated **ONLY** when the user's prompt explicitly requests concurrency (e.g., using phrases such as `"running in parallel"`, `"in parallel"`, or `"parallel mode"`).
+     - **Concurrent Fan-Out**: Launch one read-only research subagent per TBD conference concurrently in parallel to execute the multi-tier retrieval pipeline.
+     - **Anti-Race Condition & Single-Writer Constraint**: Subagents are strictly read-only and must never modify files. Only the primary coordinator agent edits YAML files, serializing disk writes to `src/data/conferences/<short_name>.yml` as subagent reports are received.
+     - **Independent File Partitioning**: Each conference modifies exclusively its own distinct YAML file. No shared file is ever touched concurrently.
 8. **RULE 8 — FRESH REAL-TIME SEARCH ON EVERY INVOCATION.**
    On every fresh instantiation or request to check/update dates, you MUST perform a fresh real-time search/fetch of the conference website URLs. Do NOT rely on cached context, previous conversation turns, or assumptions from past turns/in-memory states within the conversation to skip fetches. Always execute fresh URL lookups.
 9. **RULE 9 — NO GIT OPERATIONS WHATSOEVER.**
