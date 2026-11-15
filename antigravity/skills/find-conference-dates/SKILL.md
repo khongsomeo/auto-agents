@@ -182,7 +182,20 @@ Launch **one** research subagent with a task that covers both URLs. This is your
 - **`format`**: `in-person` or `hybrid` — **no other values are permitted**.
 - **`date`**: Human-readable conference date range (e.g., `"November 5-9, 2027"`).
 - **`start`** / **`end`**: ISO dates for the first and last conference day (e.g., `2027-11-05` / `2027-11-09`).
-- **`note`** *(optional)*: Any special submission notes (e.g., `"OpenReview submission"`).
+- **`note`** *(optional but strongly recommended)*: Detailed submission specifications extracted directly from the conference Call for Papers or author guidelines. Make this field **as detailed as possible** using the standard structured HTML format:
+  ```yaml
+  note: "<b>Review:</b> <Double-blind|Single-blind|Open review>. <b>Length:</b> <Page limits for regular/short papers, reference rules>. <b>Platform:</b> <Submission system, e.g. OpenReview, Microsoft CMT, EasyChair, HotCRP>. <b>Preprints:</b> <arXiv policy / dual submission rules>. <b>Presentation:</b> <In-person/virtual policy>. <b>Proceedings:</b> <Publisher/index, e.g. IEEE Xplore, ACM DL, Springer LNCS>."
+  ```
+  Capture key author constraints across the six essential dimensions:
+  1. **Review Policy (`Review`)**: Double-blind (anonymized) vs. Single-blind vs. Open review.
+  2. **Page Limits / Length (`Length`)**: Maximum pages for regular/long and short papers, clarifying whether references or appendices are counted or excluded (e.g., `Regular papers max 8 pages + unlimited references; short papers max 4 pages`).
+  3. **Submission Platform (`Platform`)**: Portal used (e.g., `OpenReview`, `Microsoft CMT`, `EasyChair`, `HotCRP`, `Linklings`, `Softconf START`).
+  4. **Preprints / Dual Submission (`Preprints`)**: arXiv policy and dual-submission restrictions (e.g., whether arXiv preprints are permitted before or during review, anonymity embargo periods).
+  5. **Presentation / Attendance (`Presentation`)**: In-person attendance mandate vs. hybrid/virtual presentation allowances.
+  6. **Special Routes & Proceedings (`Proceedings`)**: E.g., ACL Rolling Review (ARR) commitment, journal presentation options (e.g., IEEE OJ-SP), fast-track journal invitations, proceedings publisher (`IEEE Xplore`, `ACM DL`, `Springer LNCS/LNAI`, `PMLR`).
+  - *Example*:
+    `note: "<b>Review:</b> Double-blind. <b>Length:</b> Max 8 pages plus unlimited references (short papers max 4 pages). <b>Platform:</b> OpenReview. <b>Preprints:</b> arXiv allowed anytime. <b>Presentation:</b> In-person in Singapore. <b>Proceedings:</b> IEEE Xplore."`
+  - *Crucial Rule on TBD*: The `note` field must **NEVER** be set to `"TBD"` and must **NEVER** be counted toward TBD fields. If submission details are not yet announced on the website, simply omit the unannounced aspects or omit the `note` field entirely.
 
 > **Important**: Be thorough. Navigate to sub-pages (CFP, Important Dates, etc.) if the homepage does not list all dates. **Do not guess or fabricate dates** — only record what is explicitly stated on the website.
 
@@ -269,6 +282,7 @@ Available tags (from `resources/available_tags.json`):
 | `information-retrieval` | Information Retrieval |
 | `cryptography` | Cryptography |
 | `security-and-privacy` | Security & Privacy |
+| `quantum-computing` | Quantum Computing |
 
 **How to assign tags:**
 
@@ -289,6 +303,7 @@ Available tags (from `resources/available_tags.json`):
 - Information Retrieval / Search / Recommendation → `information-retrieval`
 - Video / Multimedia → `multimedia`
 - Robotics / Autonomous systems → `robotics`
+- Quantum Computing / Quantum Information / Quantum Algorithms → `quantum-computing`
 
 ---
 
@@ -328,7 +343,7 @@ Available tags (from `resources/available_tags.json`):
       rank_name: <A*|A|B|C>
       rank_source: <ICOREyyyy>
       rank_source_url: <core_ranking_url>
-  note: "<optional note>"   # omit this field entirely if not applicable
+  note: "<b>Review:</b> ... <b>Length:</b> ... <b>Platform:</b> ... <b>Preprints:</b> ... <b>Presentation:</b> ... <b>Proceedings:</b> ..."   # omit this field entirely if not applicable, NEVER set to TBD
 ```
 
 > If there are multiple editions (e.g., both 2026 and 2027 entries), list the **most recent/upcoming** edition first, followed by older ones, each as a separate YAML list item (`- title: ...`) in the same file.
@@ -358,7 +373,7 @@ Before writing **each** file, answer every question. A "no" on the first three i
 - [ ] `start` and `end` are unquoted ISO date strings (`YYYY-MM-DD`).
 - [ ] `year` is an unquoted integer.
 - [ ] `rank_source` is `ICOREXXXX` format (e.g., `ICORE2026`).
-- [ ] The `note` field is omitted entirely if not applicable.
+- [ ] The `note` field contains detailed submission instructions across the 6 key dimensions (Review policy, Page limits, Submission platform, Preprints, Presentation, Proceedings) when available, formatted using `<b>Key:</b> Value`, is omitted if no details exist, and is NEVER set to `TBD` or treated as a TBD field.
 
 ---
 

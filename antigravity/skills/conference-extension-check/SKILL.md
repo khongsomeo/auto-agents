@@ -149,6 +149,18 @@ If an extension is confirmed:
    - (Or `type: abstract` and label `"(Extended) Abstract Submission"` if it was an abstract deadline extension).
    - Use `23:59:00` for the time unless the conference specifies a different time.
    - Preserve timezone formatting (`UTC-12`, `AoE`, or local timezone as designated by the conference).
+5. **Enriching or Verifying the `note` Field**: If the extension notice or CFP contains pertinent author submission instructions, enrich or verify the `note` field to keep it as detailed as possible using the standard structured HTML format:
+   ```yaml
+   note: "<b>Review:</b> <Review policy>. <b>Length:</b> <Page limits>. <b>Platform:</b> <Submission system>. <b>Preprints:</b> <arXiv policy>. <b>Presentation:</b> <Presentation format>. <b>Proceedings:</b> <Publisher/Index>."
+   ```
+   Capture information across all 6 key dimensions whenever available:
+   - **Review policy (`Review`)**: Double-blind (anonymized) vs. Single-blind vs. Open review.
+   - **Page limits / Length (`Length`)**: Maximum pages for regular/long and short papers, clarifying whether references/appendices are counted or excluded.
+   - **Submission platform (`Platform`)**: Portal used (e.g., `OpenReview`, `Microsoft CMT`, `EasyChair`, `HotCRP`, `Linklings`, `Softconf START`).
+   - **Preprints / Dual Submission (`Preprints`)**: arXiv policy and dual-submission restrictions.
+   - **Presentation / Attendance (`Presentation`)**: In-person attendance mandate vs. hybrid/virtual presentation allowances.
+   - **Special Routes & Proceedings (`Proceedings`)**: E.g., ARR commitment, journal tracks, proceedings publisher (`IEEE Xplore`, `ACM DL`, `Springer LNCS/LNAI`, `PMLR`).
+   - *Crucial Rule on TBD*: The `note` field stores helpful author guidance and must **NEVER** be set to `"TBD"`, and must **NEVER** be counted toward TBD fields. If unannounced, omit the unannounced items or omit the field entirely.
 
 ### Step 5: Report Results
 After completing all checks (sequential or parallel), output a clean, structured report to the user:

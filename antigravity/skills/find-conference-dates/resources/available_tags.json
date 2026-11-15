@@ -11,5 +11,6 @@
   "information-theory": { "id": "information-theory", "label": "Information Theory" },
   "information-retrieval": { "id": "information-retrieval", "label": "Information Retrieval" },
   "cryptography": { "id": "cryptography", "label": "Cryptography" },
-  "security-and-privacy": { "id": "security-and-privacy", "label": "Security & Privacy" }
+  "security-and-privacy": { "id": "security-and-privacy", "label": "Security & Privacy" },
+  "quantum-computing": { "id": "quantum-computing", "label": "Quantum Computing" }
 }

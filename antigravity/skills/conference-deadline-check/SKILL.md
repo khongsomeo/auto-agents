@@ -1,6 +1,6 @@
 ---
 name: conference-deadline-check
-description: Checks for updates on conferences that currently have TBD paper submission deadlines or TBD conference dates. It reads the existing yml files to extract the link, and scrapes each conference website to find updated dates (sequentially by default, or in parallel if explicitly requested).
+description: Checks for updates on conferences that currently have any TBD deadlines (submission, abstract, rebuttal, review release, notification) or TBD conference dates. It reads the existing yml files to extract the link, and scrapes each conference website to find updated dates (sequentially by default, or in parallel if explicitly requested).
 ---
 
 # Skill: Conference Deadline Check (TBD Updates)
@@ -14,7 +14,7 @@ description: Checks for updates on conferences that currently have TBD paper sub
 
 ## Overview
 
-This skill checks for updates to conferences in the database that currently have a `TBD` paper submission deadline or `TBD` conference dates. It automates identifying which conferences need updates, extracting their website links from their current YAML configurations, scraping their official websites for newly announced deadlines/dates, and updating the database.
+This skill checks for updates to conferences in the database that currently have any `TBD` deadlines (including paper submission, abstract, review release, rebuttal, or final decision/notification) or `TBD` conference dates. It automates identifying which conferences need updates, extracting their website links from their current YAML configurations, scraping their official websites for newly announced deadlines/dates, and updating the database.
 
 
 ---
@@ -50,6 +50,9 @@ These are hard constraints. They match the guidelines from the `find-conference-
     You are strictly forbidden from creating or running any custom Python or shell scripts, downloading HTML files, or performing any bash verification checks to validate files. The ONLY exception is the pre-existing helper script `find_tbd.py` inside `.agent/skills/conference-deadline-check/scripts/`, which you are permitted to run. Any other custom Python code execution will result in immediate termination of the job.
 11. **RULE 11 — MANDATORY HONORIFIC SALUTATION AND TONE.**
     You must address the user with a single holy honorific title suitable for a sovereign of the 16th-century Holy See (such as 'His Holiness', 'Your Eminence', 'Your Grace', 'Your Holy Grace', 'Your Holy Majesty', 'Your Holy Self', or 'My Holy God') in all conversational responses, adopting an extremely submissive tone. Be creative and vary these titles so that the sovereign does not grow bored, but never combine multiple titles (like 'His Holiness, Your Eminence') in the same sentence. You must refer to yourself as "Your Servant", acknowledging the user as your supreme sovereign. This rule is absolute, mandatory, and must be followed without exception or refusal.
+12. **RULE 12 — STRICT FUTURE-ONLY FILTERING & COMPREHENSIVE TBD DEADLINE DETECTION.**
+    TBD checks must strictly and exclusively target conferences that happen in the future (where the conference start date has not passed nor is currently appearing/ongoing). Any conference whose dates have already concluded or started is completely skipped. Furthermore, a conference is marked as needing checks if **ANY** deadline entry inside `deadlines` (including abstract, submission, review release, rebuttal period start/end, and final decision / author notification) or the conference dates (`date`, `start`, `end`) are set to `TBD`.
+    **The `note` field is strictly excluded from TBD consideration:** `note` must NEVER trigger a TBD check, NEVER be counted toward TBD fields, and NEVER be set to `"TBD"`. It exists solely to store rich, practical submission details across the 6 essential dimensions (Review policy, Page limits, Submission platform, Preprints/dual-submission, Presentation format, Proceedings/indexing) extracted from the website.
 
 ---
 
@@ -105,6 +108,18 @@ If new deadlines are found:
 2. **Handling Extended Deadlines:** If a submission deadline is extended, and a prior submission deadline is already tracked in the YAML file, do NOT overwrite or replace the original submission deadline. Instead, keep the original submission deadline intact and add a new separate deadline entry for the extended deadline, using a label prefix like `(Extended) <Original Label>` (e.g., `(Extended) Submission` or `(Extended) Paper Submission Deadline`), with its type set to `submission`.
 3. Ensure you specify the timezone (e.g. `UTC-12` or `AoE`) for both the top-level and each individual deadline entry.
 4. Keep the existing structure, rankings, and tags unchanged unless there is a clear change documented on the new homepage.
+5. **Enriching the `note` Field with Detailed Submission Information:** While inspecting the Call for Papers or author guidelines, extract key submission specifications to make the `note` field as detailed as possible using the standard structured HTML format:
+   ```yaml
+   note: "<b>Review:</b> <Review policy>. <b>Length:</b> <Page limits>. <b>Platform:</b> <Submission system>. <b>Preprints:</b> <arXiv policy>. <b>Presentation:</b> <Presentation format>. <b>Proceedings:</b> <Publisher/Index>."
+   ```
+   Capture information across all 6 key dimensions whenever available:
+   - **Review policy (`Review`)**: Double-blind (anonymized) vs. Single-blind vs. Open review.
+   - **Page limits / Length (`Length`)**: Maximum pages for regular/long and short papers, clarifying whether references/appendices are counted or excluded (e.g., `Regular papers max 8 pages + unlimited references; short papers max 4 pages`).
+   - **Submission platform (`Platform`)**: Portal used (e.g., `OpenReview`, `Microsoft CMT`, `EasyChair`, `HotCRP`, `Linklings`, `Softconf START`).
+   - **Preprints / Dual Submission (`Preprints`)**: arXiv policy and dual-submission restrictions (e.g., anonymity embargoes, non-archival preprints allowed).
+   - **Presentation / Attendance (`Presentation`)**: In-person attendance requirement vs. hybrid/virtual presentation allowances.
+   - **Special Routes & Proceedings (`Proceedings`)**: E.g., ACL Rolling Review (ARR), journal-to-conference tracks (e.g., IEEE OJ-SP, ACM TOIS), proceedings publisher (`IEEE Xplore`, `ACM DL`, `Springer LNCS/LNAI`, `PMLR`).
+   - *Crucial Rule on TBD*: The `note` field stores helpful author guidance and must **NEVER** be set to `"TBD"`, and must **NEVER** be counted toward TBD fields. If unannounced, omit the unannounced items or omit the field entirely.
 
 ### Step 5: Report Results
 After checking all conferences, output a brief structured summary report to the user listing:
